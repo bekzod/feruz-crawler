@@ -18,3 +18,9 @@ test("translateField uses dictionary when available", async () => {
 test("translateField returns null for empty", async () => {
   expect(await translateField("color", "", { cache: memCache(), openai: noOpenAI })).toBeNull();
 });
+
+test("translateField falls back to original text when openai throws", async () => {
+  const throwingOpenAI = { translate: async () => { throw new Error("401"); } };
+  const out = await translateField("model", "ヴォクシー", { cache: memCache(), openai: throwingOpenAI });
+  expect(out).toBe("ヴォクシー");
+});
