@@ -17,10 +17,15 @@ export async function translateField(field, value, { cache, openai }) {
   if (cached) return cached;
 
   if (openai) {
-    const english = await openai.translate(field, text);
-    if (english) {
-      await cache.set(field, text, english);
-      return english;
+    try {
+      const english = await openai.translate(field, text);
+      if (english) {
+        await cache.set(field, text, english);
+        return english;
+      }
+    } catch (err) {
+      // OpenAI unavailable / invalid key — fall back to original text
+      console.warn(`[lookup] translateField(${field}) OpenAI error: ${err?.message ?? err}`);
     }
   }
   return text;
