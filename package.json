@@ -12,6 +12,20 @@
     "check": "bun test",
     "dev:web": "bun --filter @feruz-crawler/web dev",
     "build:web": "bun --filter @feruz-crawler/web build",
-    "preview:web": "bun --filter @feruz-crawler/web preview"
+    "preview:web": "bun --filter @feruz-crawler/web preview",
+    "dev:worker": "bun --watch apps/worker/src/index.js",
+    "start:worker": "bun apps/worker/src/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10"
+  },
+  "dependencies": {
+    "bullmq": "5.78.0",
+    "drizzle-orm": "0.45.2",
+    "ioredis": "5.11.1",
+    "postgres": "3.4.9",
+    "zod": "4.4.3"
   }
 }

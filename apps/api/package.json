@@ -10,6 +10,7 @@
   "dependencies": {
     "@feruz-crawler/lookup": "workspace:*",
     "cloakbrowser": "^0.3.26",
+    "openai": "6.42.0",
     "playwright-core": "^1.49.0"
   }
 }
