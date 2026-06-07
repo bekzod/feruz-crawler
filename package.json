@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "bun --watch apps/api/src/index.js",
     "start": "bun apps/api/src/index.js",
-    "check": "bun test"
+    "check": "bun test",
+    "dev:web": "bun --filter @feruz-crawler/web dev",
+    "build:web": "bun --filter @feruz-crawler/web build",
+    "preview:web": "bun --filter @feruz-crawler/web preview"
   }
 }
