@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY package.json bun.lock ./
 COPY apps/api/package.json ./apps/api/package.json
+COPY apps/web/package.json ./apps/web/package.json
 COPY packages/lookup/package.json ./packages/lookup/package.json
 
 RUN bun install --frozen-lockfile --production
@@ -34,12 +35,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Deterministic, user-independent cache path for the stealth Chromium binary.
 ENV CLOAKBROWSER_CACHE_DIR=/app/.cloakbrowser
 
+# Bun's workspace install keeps cloakbrowser/playwright-core symlinks under
+# apps/api/node_modules (the real packages live in the root .bun store), so copy
+# both: the store via the root node_modules and the resolving symlinks.
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 
 # Pre-download the ~200MB stealth Chromium at build time so containers start
 # instantly. Placed before copying source so this heavy layer stays cached
-# across application code changes.
-RUN bun -e "const { ensureBinary } = await import('cloakbrowser'); await ensureBinary();"
+# across application code changes. Run from apps/api, where cloakbrowser resolves.
+RUN cd apps/api && bun -e "const { ensureBinary } = await import('cloakbrowser'); await ensureBinary();"
 
 COPY . .
 
