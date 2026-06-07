@@ -15,8 +15,8 @@
     "preview:web": "bun --filter @feruz-crawler/web preview",
     "dev:worker": "bun --watch apps/worker/src/index.js",
     "start:worker": "bun apps/worker/src/index.js",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:generate": "drizzle-kit generate --config packages/db/drizzle.config.js",
+    "db:migrate": "drizzle-kit migrate --config packages/db/drizzle.config.js"
   },
   "devDependencies": {
     "drizzle-kit": "0.31.10"
