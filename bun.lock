@@ -44,6 +44,16 @@
         "vite": "^8.0.12",
       },
     },
+    "packages/crawler": {
+      "name": "@feruz-crawler/crawler",
+      "version": "0.1.0",
+      "dependencies": {
+        "@feruz-crawler/lookup": "workspace:*",
+        "@feruz-crawler/shared": "workspace:*",
+        "cloakbrowser": "^0.3.26",
+        "playwright-core": "^1.49.0",
+      },
+    },
     "packages/db": {
       "name": "@feruz-crawler/db",
       "version": "0.1.0",
@@ -184,6 +194,8 @@
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.7.2", "", { "dependencies": { "@eslint/core": "^1.2.1", "levn": "^0.4.1" } }, "sha512-+CNAzxglkrpNf/kKywqQfk74QjtceuOE7Qm+AF8miRvPF/wmmK5+OJOgVh3AVTT3RP2mH3+FOaxlE5v72owk0A=="],
 
     "@feruz-crawler/api": ["@feruz-crawler/api@workspace:apps/api"],
+
+    "@feruz-crawler/crawler": ["@feruz-crawler/crawler@workspace:packages/crawler"],
 
     "@feruz-crawler/db": ["@feruz-crawler/db@workspace:packages/db"],
 

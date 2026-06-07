@@ -1,0 +1,13 @@
+{
+  "name": "@feruz-crawler/crawler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/adapters/index.js",
+  "dependencies": {
+    "@feruz-crawler/lookup": "workspace:*",
+    "@feruz-crawler/shared": "workspace:*",
+    "cloakbrowser": "^0.3.26",
+    "playwright-core": "^1.49.0"
+  }
+}
