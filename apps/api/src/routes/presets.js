@@ -29,11 +29,13 @@ export async function presetsRoutes(db, request, url) {
     for (const k of ["name", "enabled", "sites", "telegramChatId"]) if (k in b) patch[k] = b[k];
     if (b.criteria) patch.criteria = criteriaSchema.parse(b.criteria);
     const [row] = await db.update(schema.filterPresets).set(patch).where(eq(schema.filterPresets.id, id)).returning();
+    if (!row) return json({ error: "not found" }, 404);
     await syncSchedules(db);
     return json(row);
   }
   if (request.method === "DELETE" && id) {
-    await db.delete(schema.filterPresets).where(eq(schema.filterPresets.id, id));
+    const deleted = await db.delete(schema.filterPresets).where(eq(schema.filterPresets.id, id)).returning();
+    if (deleted.length === 0) return json({ error: "not found" }, 404);
     await syncSchedules(db);
     return json({ ok: true });
   }
