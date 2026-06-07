@@ -19,7 +19,12 @@
       "name": "@feruz-crawler/api",
       "version": "0.1.0",
       "dependencies": {
+        "@feruz-crawler/crawler": "workspace:*",
+        "@feruz-crawler/db": "workspace:*",
         "@feruz-crawler/lookup": "workspace:*",
+        "@feruz-crawler/shared": "workspace:*",
+        "@feruz-crawler/worker": "workspace:*",
+        "bullmq": "^5.0.0",
         "cloakbrowser": "^0.3.26",
         "openai": "6.42.0",
         "playwright-core": "^1.49.0",
