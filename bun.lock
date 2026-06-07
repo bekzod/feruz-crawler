@@ -48,6 +48,15 @@
       "name": "@feruz-crawler/lookup",
       "version": "0.1.0",
     },
+    "packages/shared": {
+      "name": "@feruz-crawler/shared",
+      "version": "0.1.0",
+      "dependencies": {
+        "bullmq": "^5.0.0",
+        "ioredis": "^5.4.0",
+        "zod": "^4.4.3",
+      },
+    },
   },
   "packages": {
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
@@ -165,6 +174,8 @@
     "@feruz-crawler/api": ["@feruz-crawler/api@workspace:apps/api"],
 
     "@feruz-crawler/lookup": ["@feruz-crawler/lookup@workspace:packages/lookup"],
+
+    "@feruz-crawler/shared": ["@feruz-crawler/shared@workspace:packages/shared"],
 
     "@feruz-crawler/web": ["@feruz-crawler/web@workspace:apps/web"],
 
