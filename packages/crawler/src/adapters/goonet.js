@@ -17,6 +17,25 @@ function toAbsolute(href) {
   return "https://www.goo-net.com" + href;
 }
 
+/** Extract maker + model from the listing title.
+ *  Goo-net's <h1 class="copy"> reads "トヨタ ヴォクシー ＺＳ　煌…の中古車販売情報"
+ *  (maker, then model, then grade/description). We take the first two
+ *  whitespace-separated tokens; fall back to og:title if the h1 is absent.
+ *  Returns { maker, model } with null for anything missing.
+ *  Whitespace includes the JP full-width space (　).
+ */
+function makerModelFromTitle(doc) {
+  const h1 = doc.querySelector("h1.copy");
+  let lead = h1 ? h1.textContent : null;
+  if (!lead) {
+    const og = doc.querySelector('meta[property="og:title"]');
+    lead = og ? og.getAttribute("content") : null;
+  }
+  if (!lead) return { maker: null, model: null };
+  const tokens = lead.trim().split(/[\s　]+/).filter(Boolean);
+  return { maker: tokens[0] || null, model: tokens[1] || null };
+}
+
 // ---------------------------------------------------------------------------
 // detectFromUrl
 // ---------------------------------------------------------------------------
@@ -153,6 +172,12 @@ async function parseListingPage(doc, url, deps) {
       }
     }
   }
+
+  // --- 3b. Maker / model from the page title (not in the spec tables) ---
+  // Inject under the recognised specLabels keys so they canonicalize.
+  const { maker, model } = makerModelFromTitle(doc);
+  if (maker && !specMap["メーカー"]) specMap["メーカー"] = maker;
+  if (model && !specMap["車名"]) specMap["車名"] = model;
 
   // --- 4. Translate to canonical ---
   const canonical = await specMapToCanonical(specMap, deps);

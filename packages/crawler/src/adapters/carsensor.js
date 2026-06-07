@@ -43,6 +43,29 @@ function remapLabel(key) {
   return LABEL_REMAP[key] ?? key;
 }
 
+/** Extract maker + model from the listing title.
+ *  Carsensor's <h1 class="title1"> leads with a text node "トヨタ ヤリス"
+ *  (maker then model), followed by a nested <span> holding the grade/desc.
+ *  We read the leading text node and take the first two whitespace-separated
+ *  tokens. Returns { maker, model } with null for anything missing.
+ *  Whitespace includes the JP full-width space (　).
+ */
+function makerModelFromTitle(doc) {
+  const h1 = doc.querySelector("h1.title1");
+  if (!h1) return { maker: null, model: null };
+  // Concatenate leading text nodes (maker + model are separate text nodes
+  // joined by a non-breaking space) up to the first element child (the grade
+  // <span>), so the long grade/description text doesn't pollute the tokens.
+  let lead = "";
+  for (const node of h1.childNodes) {
+    if (node.nodeType === 1) break; // element node => stop (grade span)
+    lead += node.textContent;
+  }
+  if (!lead.trim()) return { maker: null, model: null };
+  const tokens = lead.trim().split(/[\s　]+/).filter(Boolean);
+  return { maker: tokens[0] || null, model: tokens[1] || null };
+}
+
 // ---------------------------------------------------------------------------
 // detectFromUrl
 // ---------------------------------------------------------------------------
@@ -212,6 +235,12 @@ async function parseListingPage(doc, url, deps) {
       }
     }
   }
+
+  // --- 3b. Maker / model from the page title (not in the spec table) ---
+  // Inject under the recognised specLabels keys so they canonicalize.
+  const { maker, model } = makerModelFromTitle(doc);
+  if (maker && !specMap["メーカー"]) specMap["メーカー"] = maker;
+  if (model && !specMap["車名"]) specMap["車名"] = model;
 
   // --- 4. Translate to canonical ---
   const canonical = await specMapToCanonical(specMap, deps);

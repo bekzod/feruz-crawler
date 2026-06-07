@@ -5,7 +5,7 @@ const NUMERIC = {
   displacementCc: normalize.parseInt0, doors: normalize.parseInt0, seats: normalize.parseInt0,
   totalPrice: normalize.parseYen, vehiclePrice: normalize.parseYen
 };
-const TRANSLATED = ["maker", "color", "transmission", "fuelType", "bodyType", "drivetrain", "prefecture"];
+const TRANSLATED = ["maker", "model", "grade", "color", "transmission", "fuelType", "bodyType", "drivetrain", "prefecture"];
 
 function parseRepairHistory(value) {
   if (value == null) return null;
@@ -21,7 +21,7 @@ export async function specMapToCanonical(specMap, deps) {
     if (NUMERIC[field]) out[field] = NUMERIC[field](rawValue);
     else if (field === "repairHistory") out[field] = parseRepairHistory(rawValue);
     else if (TRANSLATED.includes(field)) out[field] = await translateField(field, rawValue, deps);
-    else if (field === "model" || field === "grade" || field === "inspectionUntil") out[field] = String(rawValue).trim();
+    else if (field === "inspectionUntil") out[field] = String(rawValue).trim();
   }
   return out;
 }

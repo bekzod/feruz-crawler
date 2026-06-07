@@ -22,6 +22,10 @@ test("parseListingPage extracts real canonical fields", async () => {
   const listing = await carsensor.parseListingPage(doc, "https://www.carsensor.net/usedcar/detail/AU7049530165/index.html", memDeps);
   expect(listing.source).toBe("carsensor");
   expect(listing.sourceListingId).toBe("AU7049530165");
+  // Maker: トヨタ → toyota (resolved via dictionary, from h1.title1)
+  expect(listing.maker).toBe("toyota");
+  // Model: ヤリス → passthrough Japanese in tests (openai is null)
+  expect(listing.model).toBeTruthy();
   // Total price: .totalPrice__price text = "120万円" => 1,200,000
   expect(listing.totalPrice).toBe(1200000);
   // Model year: from table "年式(初度登録年)" => "2021(R03)" => parseYear => 2021

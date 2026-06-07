@@ -61,6 +61,12 @@ describe("goonet.parseListingPage", () => {
     expect(typeof result.mileageKm).toBe("number");
     expect(result.mileageKm).toBe(52000);
 
+    // Maker: トヨタ → toyota (resolved via dictionary, from h1/breadcrumb title)
+    expect(result.maker).toBe("toyota");
+
+    // Model: ヴォクシー → passthrough Japanese in tests (openai is null)
+    expect(result.model).toBeTruthy();
+
     // Color: 車体色 = ブラック → canonicalized (locks the translate pipeline)
     expect(result.color).toBeTruthy();
 
