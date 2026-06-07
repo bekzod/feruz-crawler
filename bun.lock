@@ -44,6 +44,18 @@
         "vite": "^8.0.12",
       },
     },
+    "apps/worker": {
+      "name": "@feruz-crawler/worker",
+      "version": "0.1.0",
+      "dependencies": {
+        "@feruz-crawler/crawler": "workspace:*",
+        "@feruz-crawler/db": "workspace:*",
+        "@feruz-crawler/lookup": "workspace:*",
+        "@feruz-crawler/shared": "workspace:*",
+        "bullmq": "^5.0.0",
+        "ioredis": "^5.4.0",
+      },
+    },
     "packages/crawler": {
       "name": "@feruz-crawler/crawler",
       "version": "0.1.0",
@@ -207,6 +219,8 @@
     "@feruz-crawler/shared": ["@feruz-crawler/shared@workspace:packages/shared"],
 
     "@feruz-crawler/web": ["@feruz-crawler/web@workspace:apps/web"],
+
+    "@feruz-crawler/worker": ["@feruz-crawler/worker@workspace:apps/worker"],
 
     "@humanfs/core": ["@humanfs/core@0.19.2", "", { "dependencies": { "@humanfs/types": "^0.15.0" } }, "sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA=="],
 
