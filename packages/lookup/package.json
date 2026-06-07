@@ -6,5 +6,9 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@feruz-crawler/db": "workspace:*",
+    "openai": "^6.0.0"
   }
 }

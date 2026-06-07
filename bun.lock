@@ -55,6 +55,10 @@
     "packages/lookup": {
       "name": "@feruz-crawler/lookup",
       "version": "0.1.0",
+      "dependencies": {
+        "@feruz-crawler/db": "workspace:*",
+        "openai": "^6.0.0",
+      },
     },
     "packages/shared": {
       "name": "@feruz-crawler/shared",
