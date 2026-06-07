@@ -1,0 +1,14 @@
+{
+  "name": "feruz-crawler",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --watch apps/api/src/index.js",
+    "start": "bun apps/api/src/index.js",
+    "check": "bun test"
+  }
+}

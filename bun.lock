@@ -1,0 +1,25 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "feruz-crawler",
+    },
+    "apps/api": {
+      "name": "@feruz-crawler/api",
+      "version": "0.1.0",
+      "dependencies": {
+        "@feruz-crawler/lookup": "workspace:*",
+      },
+    },
+    "packages/lookup": {
+      "name": "@feruz-crawler/lookup",
+      "version": "0.1.0",
+    },
+  },
+  "packages": {
+    "@feruz-crawler/api": ["@feruz-crawler/api@workspace:apps/api"],
+
+    "@feruz-crawler/lookup": ["@feruz-crawler/lookup@workspace:packages/lookup"],
+  }
+}

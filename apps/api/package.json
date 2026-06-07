@@ -1,0 +1,13 @@
+{
+  "name": "@feruz-crawler/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.js",
+    "start": "bun src/index.js"
+  },
+  "dependencies": {
+    "@feruz-crawler/lookup": "workspace:*"
+  }
+}
