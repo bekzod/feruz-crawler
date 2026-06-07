@@ -61,6 +61,12 @@ describe("goonet.parseListingPage", () => {
     expect(typeof result.mileageKm).toBe("number");
     expect(result.mileageKm).toBe(52000);
 
+    // Color: 車体色 = ブラック → canonicalized (locks the translate pipeline)
+    expect(result.color).toBeTruthy();
+
+    // Transmission: ミッション = インパネAT → canonicalized
+    expect(result.transmission).toBeTruthy();
+
     // Description must be truthy
     expect(result.descriptionOriginal).toBeTruthy();
 
@@ -97,8 +103,9 @@ describe("goonet.parseSearchPage", () => {
     expect(ref.url).toContain("https://www.goo-net.com");
     expect(ref.url).toContain("/usedcar/spread/goo/");
 
-    // sourceListingId is the car number from the URL
+    // sourceListingId is the car number from the URL (plausible long digit id)
     expect(ref.sourceListingId).toBeTruthy();
+    expect(ref.sourceListingId).toMatch(/^\d{10,25}$/);
 
     // nextPageUrl from rel="next" link
     expect(result.nextPageUrl).toBe("https://www.goo-net.com/usedcar/brand-TOYOTA/list/index-2.html");

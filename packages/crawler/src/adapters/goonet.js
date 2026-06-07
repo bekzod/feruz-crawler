@@ -35,9 +35,17 @@ function detectFromUrl(url) {
 // Price/year/mileage range params are NOT appended — goo-net uses dynamic
 // AJAX filters rather than clean query params on the list URL.
 function buildSearchUrl(criteria = {}) {
-  const maker = criteria.maker ? criteria.maker.toUpperCase() : null;
-  if (maker) {
-    return `https://www.goo-net.com/usedcar/brand-${maker}/list/`;
+  // Slug the maker to a safe brand path segment: uppercase, keep only
+  // alphanumerics + hyphen (goo-net brand slugs e.g. MERCEDES-BENZ).
+  // Guards against spaces / special chars producing a malformed URL.
+  const slug = criteria.maker
+    ? String(criteria.maker)
+        .toUpperCase()
+        .replace(/[^A-Z0-9-]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+    : "";
+  if (slug) {
+    return `https://www.goo-net.com/usedcar/brand-${slug}/list/`;
   }
   return "https://www.goo-net.com/usedcar/all/list/";
 }
@@ -129,7 +137,10 @@ async function parseListingPage(doc, url, deps) {
   }
 
   // --- 3. Detail spec tables (.tbl_type01): th/td pairs ---
-  for (const table of doc.querySelectorAll("table.tbl_type01")) {
+  // Exclude the catalog/warranty tables (.catalog_tbl) which carry new-car
+  // catalog data unrelated to this specific listing — they would pollute
+  // the persisted raw.specMap with ~20-30 spurious JP keys.
+  for (const table of doc.querySelectorAll("table.tbl_type01:not(.catalog_tbl)")) {
     for (const row of table.querySelectorAll("tr")) {
       const ths = row.querySelectorAll("th");
       const tds = row.querySelectorAll("td");
@@ -158,9 +169,11 @@ async function parseListingPage(doc, url, deps) {
     if (src && src.includes("picture1.goo-net.com")) photoSet.add(src);
   }
 
-  // Slide images: prefer src (loaded), then data-lazy (lazy-loaded)
+  // Slide images: prefer data-lazy (full-size /J/ URL); fall back to src.
+  // The eager `src` is the nophoto_big.jpg placeholder for every lazy slide,
+  // so data-lazy must win. Slide 0 has no data-lazy and keeps its real src.
   for (const img of doc.querySelectorAll("#photoGalleryTop .item.image img")) {
-    const src = img.getAttribute("src") || img.getAttribute("data-lazy");
+    const src = img.getAttribute("data-lazy") || img.getAttribute("src");
     if (src && src.includes("picture1.goo-net.com")) photoSet.add(src);
   }
 
