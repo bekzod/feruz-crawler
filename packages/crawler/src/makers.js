@@ -14,6 +14,16 @@ function canonicalMakerValue(label) {
   return dictionaries.maker[label] ?? dictionaries.maker[normalized] ?? normalized.toLowerCase();
 }
 
+function makerDisplayLabel(value, label) {
+  const normalized = normalizeDisplayText(label);
+  if (!dictionaries.maker[label] && !dictionaries.maker[normalized]) return normalized;
+
+  return value
+    .split("-")
+    .map((word) => word.length <= 3 ? word.toUpperCase() : `${word[0].toUpperCase()}${word.slice(1)}`)
+    .join("-");
+}
+
 async function responseText(res, fallbackCharset = "utf-8") {
   const contentType = res.headers.get("content-type") ?? "";
   const charset = contentType.match(/charset=([^;]+)/i)?.[1]?.trim() || fallbackCharset;
@@ -28,7 +38,7 @@ export function mergeMakerOptions(siteMakers) {
     const value = canonicalMakerValue(maker.label);
     const existing = byValue.get(value) ?? {
       value,
-      label: normalizeDisplayText(maker.label),
+      label: makerDisplayLabel(value, maker.label),
       sites: {},
     };
     if (maker.site && maker.code) existing.sites[maker.site] = maker.code;
