@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "@feruz-crawler/db": "workspace:*",
-    "openai": "^6.0.0"
+    "openai": "^6.42.0"
   }
 }
