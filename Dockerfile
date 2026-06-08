@@ -39,11 +39,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Deterministic, user-independent cache path for the stealth Chromium binary.
 ENV CLOAKBROWSER_CACHE_DIR=/app/.cloakbrowser
 
-# Bun's workspace install keeps cloakbrowser/playwright-core symlinks under
-# apps/api/node_modules (the real packages live in the root .bun store), so copy
-# both: the store via the root node_modules and the resolving symlinks.
+# Bun's workspace install keeps workspace dependency links in the importing
+# workspace's node_modules. Copy the runtime workspaces' resolving symlinks plus
+# the root .bun store, otherwise source under packages/* cannot resolve its
+# @feruz-crawler/* and package-local production dependencies after COPY . .
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/apps/worker/node_modules ./apps/worker/node_modules
+COPY --from=deps /app/packages/crawler/node_modules ./packages/crawler/node_modules
+COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
+COPY --from=deps /app/packages/lookup/node_modules ./packages/lookup/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 
 # Pre-download the ~200MB stealth Chromium at build time so containers start
 # instantly. Placed before copying source so this heavy layer stays cached

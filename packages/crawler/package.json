@@ -14,9 +14,7 @@
     "@feruz-crawler/lookup": "workspace:*",
     "@feruz-crawler/shared": "workspace:*",
     "cloakbrowser": "^0.3.26",
+    "linkedom": "0.18.12",
     "playwright-core": "^1.49.0"
-  },
-  "devDependencies": {
-    "linkedom": "0.18.12"
   }
 }
