@@ -1,5 +1,19 @@
 # React + Vite
 
+## API host
+
+The frontend uses `VITE_API_BASE_URL` as the API base URL and falls back to `/api`.
+
+For local development, leaving it unset uses the Vite proxy in `vite.config.js`, which forwards `/api/*` to `http://localhost:3000`.
+
+For Vercel, set this environment variable on the web project before building:
+
+```bash
+VITE_API_BASE_URL=https://your-api-host.example.com
+```
+
+Then requests like `/makers` will go to `https://your-api-host.example.com/makers` instead of the web app's own `/api/makers`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
