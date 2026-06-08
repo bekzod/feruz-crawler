@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 import { useMakerOptions } from '../useMakerOptions.js'
 import ListingDetail from './ListingDetail.jsx'
+import TableRows from '../TableRows.jsx'
 
 const DEFAULT_FILTERS = { maker: '', priceMax: '', status: 'active' }
 
@@ -10,15 +11,21 @@ export default function Listings() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [selected, setSelected] = useState(null)
   const [error, setError] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
   const makerOptions = useMakerOptions()
 
   async function load(nextFilters = filters) {
+    setIsLoading(true)
     try {
       const qs = new URLSearchParams(Object.fromEntries(Object.entries(nextFilters).filter(([, v]) => v)))
       const data = await api.listings(`?${qs}`)
       setRows(data.rows)
       setError(null)
-    } catch (e) { setError(e.message) }
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setIsLoading(false)
+    }
   }
   useEffect(() => {
     let cancelled = false
@@ -32,6 +39,8 @@ export default function Listings() {
         }
       } catch (e) {
         if (!cancelled) setError(e.message)
+      } finally {
+        if (!cancelled) setIsLoading(false)
       }
     }
     loadInitial()
@@ -55,15 +64,14 @@ export default function Listings() {
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
       <table>
         <thead><tr><th>Source</th><th>Maker</th><th>Model</th><th>Year</th><th>Price</th><th>Mileage</th><th>Status</th></tr></thead>
-        <tbody>
+        <TableRows isLoading={isLoading} colSpan={7} emptyMessage="No listings yet.">
           {rows.map((r) => (
             <tr key={r.id} onClick={() => setSelected(r.id)} style={{ cursor: 'pointer' }}>
               <td>{r.source}</td><td>{r.maker}</td><td>{r.model}</td><td>{r.modelYear}</td>
               <td>{r.totalPrice?.toLocaleString()}</td><td>{r.mileageKm?.toLocaleString()}</td><td>{r.status}</td>
             </tr>
           ))}
-          {rows.length === 0 && <tr><td colSpan="7">No listings yet.</td></tr>}
-        </tbody>
+        </TableRows>
       </table>
     </div>
   )
