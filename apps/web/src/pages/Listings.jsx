@@ -1,29 +1,51 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
+import { useMakerOptions } from '../useMakerOptions.js'
 import ListingDetail from './ListingDetail.jsx'
+
+const DEFAULT_FILTERS = { maker: '', priceMax: '', status: 'active' }
 
 export default function Listings() {
   const [rows, setRows] = useState([])
-  const [filters, setFilters] = useState({ maker: '', priceMax: '', status: 'active' })
+  const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [selected, setSelected] = useState(null)
   const [error, setError] = useState(null)
+  const makerOptions = useMakerOptions()
 
-  async function load() {
+  async function load(nextFilters = filters) {
     try {
-      const qs = new URLSearchParams(Object.fromEntries(Object.entries(filters).filter(([, v]) => v)))
+      const qs = new URLSearchParams(Object.fromEntries(Object.entries(nextFilters).filter(([, v]) => v)))
       const data = await api.listings(`?${qs}`)
       setRows(data.rows)
       setError(null)
     } catch (e) { setError(e.message) }
   }
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    let cancelled = false
+    async function loadInitial() {
+      try {
+        const qs = new URLSearchParams(Object.fromEntries(Object.entries(DEFAULT_FILTERS).filter(([, v]) => v)))
+        const data = await api.listings(`?${qs}`)
+        if (!cancelled) {
+          setRows(data.rows)
+          setError(null)
+        }
+      } catch (e) {
+        if (!cancelled) setError(e.message)
+      }
+    }
+    loadInitial()
+    return () => { cancelled = true }
+  }, [])
 
   if (selected) return <ListingDetail id={selected} onBack={() => setSelected(null)} />
 
   return (
     <div>
       <div className="filters">
-        <input placeholder="maker" value={filters.maker} onChange={(e) => setFilters({ ...filters, maker: e.target.value })} />
+        <select aria-label="maker" value={filters.maker} onChange={(e) => setFilters({ ...filters, maker: e.target.value })}>
+          {makerOptions.map((option) => <option key={option.value || 'all'} value={option.value}>{option.label}</option>)}
+        </select>
         <input placeholder="max price" value={filters.priceMax} onChange={(e) => setFilters({ ...filters, priceMax: e.target.value })} />
         <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
           <option value="active">active</option><option value="sold_removed">sold</option><option value="">all</option>

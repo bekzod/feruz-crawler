@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
+import { useMakerOptions } from '../useMakerOptions.js'
 
 const EMPTY = { name: '', sites: ['goonet', 'carsensor'], enabled: true, telegramChatId: '', criteria: { maker: '', priceMax: '', yearMin: '' } }
 
@@ -8,8 +9,19 @@ export default function Presets() {
   const [form, setForm] = useState(EMPTY)
   const [singleUrl, setSingleUrl] = useState('')
   const [msg, setMsg] = useState(null)
+  const makerOptions = useMakerOptions()
   const load = () => api.presets().then(setPresets).catch((e) => setMsg(e.message))
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    let cancelled = false
+    api.presets()
+      .then((data) => {
+        if (!cancelled) setPresets(data)
+      })
+      .catch((e) => {
+        if (!cancelled) setMsg(e.message)
+      })
+    return () => { cancelled = true }
+  }, [])
 
   async function create() {
     try {
@@ -34,7 +46,9 @@ export default function Presets() {
         <h3>New filter preset</h3>
         <div className="filters">
           <input placeholder="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input placeholder="maker (e.g. toyota)" value={form.criteria.maker} onChange={(e) => setForm({ ...form, criteria: { ...form.criteria, maker: e.target.value } })} />
+          <select aria-label="maker" value={form.criteria.maker} onChange={(e) => setForm({ ...form, criteria: { ...form.criteria, maker: e.target.value } })}>
+            {makerOptions.map((option) => <option key={option.value || 'all'} value={option.value}>{option.label}</option>)}
+          </select>
           <input placeholder="max price" value={form.criteria.priceMax} onChange={(e) => setForm({ ...form, criteria: { ...form.criteria, priceMax: e.target.value } })} />
           <input placeholder="min year" value={form.criteria.yearMin} onChange={(e) => setForm({ ...form, criteria: { ...form.criteria, yearMin: e.target.value } })} />
           <input placeholder="telegram chat id" value={form.telegramChatId} onChange={(e) => setForm({ ...form, telegramChatId: e.target.value })} />

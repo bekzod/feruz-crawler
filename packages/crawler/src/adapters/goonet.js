@@ -69,6 +69,26 @@ function buildSearchUrl(criteria = {}) {
   return "https://www.goo-net.com/usedcar/all/list/";
 }
 
+function parseMakerOptions(doc) {
+  const makers = new Map();
+
+  for (const a of doc.querySelectorAll('a[href*="/usedcar/brand-"]')) {
+    const href = a.getAttribute("href") || "";
+    const code = href.match(/\/usedcar\/brand-([^/]+)\/?(?:$|[?#])/)?.[1];
+    if (!code || code.includes("top")) continue;
+
+    const label = a.textContent
+      .replace(/の中古車/g, "")
+      .replace(/\([^)]*\)/g, "")
+      .trim();
+    if (!label || /^[A-Z0-9-]+$/.test(label)) continue;
+
+    makers.set(code, { site: "goonet", code, label });
+  }
+
+  return Array.from(makers.values());
+}
+
 // ---------------------------------------------------------------------------
 // parseSearchPage
 // ---------------------------------------------------------------------------
@@ -231,8 +251,11 @@ async function parseListingPage(doc, url, deps) {
 // ---------------------------------------------------------------------------
 export const goonet = {
   site: "goonet",
+  makerListUrl: "https://www.goo-net.com/usedcar/brand-top.html",
+  makerListCharset: "euc-jp",
   detectFromUrl,
   buildSearchUrl,
+  parseMakerOptions,
   parseSearchPage,
   parseListingPage,
 };

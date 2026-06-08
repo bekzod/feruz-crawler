@@ -54,3 +54,12 @@ test("parseSearchPage returns listing refs", () => {
   expect(nextPageUrl).toContain("carsensor.net");
   expect(nextPageUrl).toContain("index2");
 });
+
+test("parseMakerOptions extracts makers from the search page", () => {
+  const doc = parse("carsensor-search.html");
+  const makers = carsensor.parseMakerOptions(doc);
+
+  expect(makers).toContainEqual({ site: "carsensor", code: "TO", label: "トヨタ" });
+  expect(makers).toContainEqual({ site: "carsensor", code: "HO", label: "ホンダ" });
+  expect(makers.find((maker) => maker.label === "こだわらない")).toBeUndefined();
+});
