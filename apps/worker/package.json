@@ -1,0 +1,15 @@
+{
+  "name": "@feruz-crawler/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "bun --watch src/index.js", "start": "bun src/index.js" },
+  "dependencies": {
+    "@feruz-crawler/db": "workspace:*",
+    "@feruz-crawler/shared": "workspace:*",
+    "@feruz-crawler/lookup": "workspace:*",
+    "@feruz-crawler/crawler": "workspace:*",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.4.0"
+  }
+}

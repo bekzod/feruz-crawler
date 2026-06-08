@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test";
-import { lookup } from "./index.js";
+import { translateField, normalize, dictionaries, specLabels } from "./index.js";
 
-test("lookup returns a placeholder result", () => {
-  expect(lookup("example")).toEqual({
-    query: "example",
-    status: "pending"
-  });
+test("public API exports are wired", () => {
+  expect(typeof translateField).toBe("function");
+  expect(typeof normalize.parseYen).toBe("function");
+  expect(dictionaries.maker["トヨタ"]).toBe("toyota");
+  expect(specLabels["年式"]).toBe("modelYear");
 });

@@ -1,35 +1,30 @@
-import { lookup } from "@feruz-crawler/lookup";
+import { createDb } from "@feruz-crawler/db";
+import { json } from "./json.js";
+import { presetsRoutes } from "./routes/presets.js";
+import { listingsRoutes } from "./routes/listings.js";
+import { crawlRoutes } from "./routes/crawl.js";
+import { jobsRoutes } from "./routes/jobs.js";
+import { notificationsRoutes } from "./routes/notifications.js";
 
 const port = Number(process.env.PORT ?? 3000);
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
-}
+const { db } = createDb();
+const routes = [presetsRoutes, listingsRoutes, crawlRoutes, jobsRoutes, notificationsRoutes];
 
 const server = Bun.serve({
   port,
-  fetch(request) {
+  async fetch(request) {
     const url = new URL(request.url);
-
-    if (request.method === "GET" && url.pathname === "/health") {
-      return json({ ok: true });
+    if (request.method === "OPTIONS") return json({});
+    if (request.method === "GET" && url.pathname === "/health") return json({ ok: true });
+    for (const route of routes) {
+      try {
+        const res = await route(db, request, url);
+        if (res) return res;
+      } catch (err) {
+        return json({ error: String(err?.message ?? err) }, 400);
+      }
     }
-
-    if (request.method === "GET" && url.pathname === "/") {
-      return json({
-        name: "feruz-crawler",
-        service: "api",
-        lookup: lookup("health")
-      });
-    }
-
     return json({ error: "Not found" }, 404);
   }
 });
-
 console.log(`feruz-crawler API listening on http://localhost:${server.port}`);
