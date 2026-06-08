@@ -8,13 +8,14 @@
     "start": "bun src/index.js"
   },
   "dependencies": {
-    "@feruz-crawler/lookup": "workspace:*",
+    "@feruz-crawler/crawler": "workspace:*",
     "@feruz-crawler/db": "workspace:*",
+    "@feruz-crawler/lookup": "workspace:*",
     "@feruz-crawler/shared": "workspace:*",
     "@feruz-crawler/worker": "workspace:*",
-    "@feruz-crawler/crawler": "workspace:*",
     "bullmq": "^5.0.0",
     "cloakbrowser": "^0.3.26",
+    "cors": "2.8.6",
     "openai": "6.42.0",
     "playwright-core": "^1.49.0"
   }
