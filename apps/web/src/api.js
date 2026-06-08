@@ -7,6 +7,7 @@ async function req(path, opts) {
 export const api = {
   listings: (qs = "") => req(`/listings${qs}`),
   listing: (id) => req(`/listings/${id}`),
+  makers: () => req(`/makers`),
   presets: () => req(`/presets`),
   createPreset: (p) => req(`/presets`, { method: "POST", body: JSON.stringify(p) }),
   updatePreset: (id, p) => req(`/presets/${id}`, { method: "PATCH", body: JSON.stringify(p) }),

@@ -101,6 +101,18 @@ function buildSearchUrl(criteria = {}) {
   return qs ? `${base}?${qs}` : base;
 }
 
+function parseMakerOptions(doc) {
+  return Array.from(doc.querySelectorAll(".modalMaker__maker .js_makerMenu"))
+    .map((a) => {
+      const label = a.getAttribute("title")?.trim() || a.textContent.replace(/\([^)]*\)/g, "").trim();
+      const onclick = a.getAttribute("onclick") || a.getAttribute("onClick") || "";
+      const code = onclick.match(/clickBrand\('([^']*)'/)?.[1] ?? "";
+      if (!label || !code || label === "こだわらない") return null;
+      return { site: "carsensor", code, label };
+    })
+    .filter(Boolean);
+}
+
 // ---------------------------------------------------------------------------
 // parseSearchPage
 // ---------------------------------------------------------------------------
@@ -304,8 +316,10 @@ async function parseListingPage(doc, url, deps) {
 // ---------------------------------------------------------------------------
 export const carsensor = {
   site: "carsensor",
+  makerListUrl: "https://www.carsensor.net/usedcar/search.php",
   detectFromUrl,
   buildSearchUrl,
+  parseMakerOptions,
   parseSearchPage,
   parseListingPage,
 };

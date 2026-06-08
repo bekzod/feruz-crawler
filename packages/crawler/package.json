@@ -6,6 +6,7 @@
   "main": "src/adapters/index.js",
   "exports": {
     ".": "./src/adapters/index.js",
+    "./makers": "./src/makers.js",
     "./browser": "./src/browser.js",
     "./adapters": "./src/adapters/index.js"
   },

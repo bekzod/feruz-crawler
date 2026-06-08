@@ -116,4 +116,10 @@ describe("goonet.parseSearchPage", () => {
     // nextPageUrl from rel="next" link
     expect(result.nextPageUrl).toBe("https://www.goo-net.com/usedcar/brand-TOYOTA/list/index-2.html");
   });
+
+  test("parseMakerOptions extracts maker links from site pages", () => {
+    const makers = goonet.parseMakerOptions(doc);
+
+    expect(makers).toContainEqual({ site: "goonet", code: "TOYOTA", label: "トヨタ" });
+  });
 });

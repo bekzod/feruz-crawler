@@ -5,10 +5,11 @@ import { listingsRoutes } from "./routes/listings.js";
 import { crawlRoutes } from "./routes/crawl.js";
 import { jobsRoutes } from "./routes/jobs.js";
 import { notificationsRoutes } from "./routes/notifications.js";
+import { makersRoutes } from "./routes/makers.js";
 
 const port = Number(process.env.PORT ?? 3000);
 const { db } = createDb();
-const routes = [presetsRoutes, listingsRoutes, crawlRoutes, jobsRoutes, notificationsRoutes];
+const routes = [makersRoutes, presetsRoutes, listingsRoutes, crawlRoutes, jobsRoutes, notificationsRoutes];
 
 const server = Bun.serve({
   port,
