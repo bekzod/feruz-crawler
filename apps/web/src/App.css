@@ -9,6 +9,9 @@ body { margin: 0; }
 main { padding: 16px; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td { border-bottom: 1px solid #e2e2e2; padding: 6px 8px; text-align: left; vertical-align: top; }
+.table-state { color: #666; height: 48px; text-align: center; vertical-align: middle; }
+.spinner { animation: spin 0.8s linear infinite; border: 2px solid #d6d6d6; border-top-color: #1a1a1a; border-radius: 50%; display: inline-block; height: 16px; margin-right: 8px; vertical-align: -3px; width: 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .card { border: 1px solid #e2e2e2; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
 .filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 input, select { padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; }

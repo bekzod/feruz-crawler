@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 import { useMakerOptions } from '../useMakerOptions.js'
+import TableRows from '../TableRows.jsx'
 
 const EMPTY = { name: '', sites: ['goonet', 'carsensor'], enabled: true, telegramChatId: '', criteria: { maker: '', priceMax: '', yearMin: '' } }
 
@@ -9,8 +10,20 @@ export default function Presets() {
   const [form, setForm] = useState(EMPTY)
   const [singleUrl, setSingleUrl] = useState('')
   const [msg, setMsg] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
   const makerOptions = useMakerOptions()
-  const load = () => api.presets().then(setPresets).catch((e) => setMsg(e.message))
+  const load = async () => {
+    setIsLoading(true)
+    try {
+      const data = await api.presets()
+      setPresets(data)
+      setMsg(null)
+    } catch (e) {
+      setMsg(e.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
   useEffect(() => {
     let cancelled = false
     api.presets()
@@ -19,6 +32,9 @@ export default function Presets() {
       })
       .catch((e) => {
         if (!cancelled) setMsg(e.message)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
       })
     return () => { cancelled = true }
   }, [])
@@ -60,7 +76,7 @@ export default function Presets() {
 
       <table>
         <thead><tr><th>Name</th><th>Sites</th><th>Enabled</th><th>Last run</th><th></th></tr></thead>
-        <tbody>
+        <TableRows isLoading={isLoading} colSpan={5} emptyMessage="No presets yet.">
           {presets.map((p) => (
             <tr key={p.id}>
               <td>{p.name}</td><td>{(p.sites || []).join(', ')}</td>
@@ -72,7 +88,7 @@ export default function Presets() {
               </td>
             </tr>
           ))}
-        </tbody>
+        </TableRows>
       </table>
     </div>
   )
