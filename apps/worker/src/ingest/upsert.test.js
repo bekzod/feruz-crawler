@@ -19,6 +19,58 @@ test("inserts new listing and records initial price", async () => {
   expect(prices.length).toBe(1);
 });
 
+test("translates maker before inserting listing", async () => {
+  let insertedListing;
+  const fakeDb = {
+    select: () => ({
+      from: () => ({
+        where: () => ({
+          limit: async () => [],
+        }),
+      }),
+    }),
+    insert: () => ({
+      values: (values) => {
+        insertedListing = values;
+        return { returning: async () => [{ id: "listing-1", ...values }] };
+      },
+    }),
+  };
+
+  const r = await upsertListing(fakeDb, base({ maker: "トヨタ", totalPrice: null }));
+
+  expect(insertedListing.maker).toBe("toyota");
+  expect(r.listing.maker).toBe("toyota");
+});
+
+test("translates maker before updating listing", async () => {
+  let updatedListing;
+  const fakeDb = {
+    select: () => ({
+      from: () => ({
+        where: () => ({
+          limit: async () => [{ id: "listing-1", totalPrice: null }],
+        }),
+      }),
+    }),
+    update: () => ({
+      set: (values) => {
+        updatedListing = values;
+        return {
+          where: () => ({
+            returning: async () => [{ id: "listing-1", ...values }],
+          }),
+        };
+      },
+    }),
+  };
+
+  const r = await upsertListing(fakeDb, base({ maker: "ホンダ", totalPrice: null }));
+
+  expect(updatedListing.maker).toBe("honda");
+  expect(r.listing.maker).toBe("honda");
+});
+
 test("updating with new price appends history; same price does not", async () => {
   const l = base();
   const r1 = await upsertListing(db, l);
