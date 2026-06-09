@@ -43,6 +43,22 @@ function remapLabel(key) {
   return LABEL_REMAP[key] ?? key;
 }
 
+const MAKER_TO_BRAND_CODE = {
+  toyota: "TO",
+  honda: "HO",
+  nissan: "NI",
+  mazda: "MA",
+  subaru: "SB",
+  suzuki: "SZ",
+  daihatsu: "DA",
+  mitsubishi: "MI",
+  lexus: "LE",
+  "mercedes-benz": "ME",
+  bmw: "BM",
+  audi: "AD",
+  volkswagen: "VW",
+};
+
 /** Extract maker + model from the listing title.
  *  Carsensor's <h1 class="title1"> leads with a text node "トヨタ ヤリス"
  *  (maker then model), followed by a nested <span> holding the grade/desc.
@@ -80,18 +96,14 @@ function detectFromUrl(url) {
 // ---------------------------------------------------------------------------
 // buildSearchUrl
 // ---------------------------------------------------------------------------
-// Carsensor uses query-string params on /usedcar/search.php.
-// The maker (brand) param is BDCD (brand code, e.g. "TO" for Toyota), but
-// since we only have a free-form maker string and no code mapping here, we
-// pass it as a best-effort BRDC param and include it in the q (keyword) param.
-// NOTE: actual carsensor filtering requires session-based params; this URL
-// serves as a starting point for a search session.
+// Carsensor uses query-string params on /usedcar/search.php. BRDC expects a
+// short site brand code, e.g. TO for Toyota, not the canonical maker slug.
 function buildSearchUrl(criteria = {}) {
   const base = "https://www.carsensor.net/usedcar/search.php";
   const params = new URLSearchParams();
   if (criteria.maker) {
-    // BRDC is the standard brand-code param on carsensor search forms
-    params.set("BRDC", String(criteria.maker).toUpperCase());
+    const maker = String(criteria.maker).trim().toLowerCase();
+    params.set("BRDC", MAKER_TO_BRAND_CODE[maker] ?? String(criteria.maker).toUpperCase());
   }
   if (criteria.priceMax) {
     // PRICEHIGH is the upper-price filter param on carsensor
