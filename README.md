@@ -63,6 +63,8 @@ Copy `.env.example` to `.env` and fill in:
 | `OPENAI_API_KEY` | no | Enables model/grade/free-value translation via GPT-4o-mini. Without it, unmapped field values fall back to the original Japanese text; maker still resolves via the built-in dictionary. |
 | `TELEGRAM_BOT_TOKEN` | no | Enables Telegram alerts when new listings match a notification preset. |
 | `PORT` | no | API port (default `3000`). |
+| `EXCHANGE_RATE_TTL_MS` | no | In-memory JPY exchange-rate cache TTL for listing API conversions (default `21600000`, six hours). |
+| `EXCHANGE_RATE_TIMEOUT_MS` | no | Timeout for live exchange-rate provider calls before returning JPY-only listing prices (default `2000`). |
 | `WORKER_CONCURRENCY` | no | Parallel BullMQ jobs (default `2`). |
 
 ## Running tests
