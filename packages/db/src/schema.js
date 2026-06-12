@@ -38,6 +38,13 @@ export const listings = pgTable("listings", {
   bySource: uniqueIndex("listings_source_id_uq").on(t.source, t.sourceListingId)
 }));
 
+export const makers = pgTable("makers", {
+  value: text("value").primaryKey(),
+  label: text("label").notNull(),
+  sites: jsonb("sites").notNull().default({}),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+});
+
 export const priceHistory = pgTable("price_history", {
   id: uuid("id").primaryKey().defaultRandom(),
   listingId: uuid("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
