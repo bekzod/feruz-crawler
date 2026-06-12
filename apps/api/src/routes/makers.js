@@ -1,6 +1,7 @@
 import { fetchMakerOptions } from "@feruz-crawler/crawler/makers";
 import { schema } from "@feruz-crawler/db";
 import { dictionaries } from "@feruz-crawler/lookup";
+import { sql } from "drizzle-orm";
 import { json } from "../json.js";
 
 function normalizeDisplayText(value) {
@@ -46,7 +47,22 @@ function uniqueSortedOptions(options) {
   });
 }
 
-async function fetchDbMakerOptions(db) {
+async function fetchPersistedMakerOptions(db) {
+  const rows = await db
+    .select({
+      value: schema.makers.value,
+      label: schema.makers.label,
+      sites: schema.makers.sites,
+    })
+    .from(schema.makers);
+
+  return uniqueSortedOptions([
+    { value: "", label: "all makers", sites: {} },
+    ...rows.map((row) => normalizeMakerOption(row)),
+  ]);
+}
+
+async function fetchListingMakerOptions(db) {
   const rows = await db.select({ maker: schema.listings.maker }).from(schema.listings);
   return uniqueSortedOptions([
     { value: "", label: "all makers", sites: {} },
@@ -56,13 +72,43 @@ async function fetchDbMakerOptions(db) {
   ]);
 }
 
+async function upsertMakerOptions(db, options) {
+  const rows = options
+    .filter((option) => option.value)
+    .map((option) => ({
+      value: option.value,
+      label: option.label,
+      sites: option.sites ?? {},
+    }));
+
+  if (!rows.length) return;
+
+  await db
+    .insert(schema.makers)
+    .values(rows)
+    .onConflictDoUpdate({
+      target: schema.makers.value,
+      set: {
+        label: sql`excluded.label`,
+        sites: sql`excluded.sites`,
+        updatedAt: new Date(),
+      },
+    });
+}
+
 export async function makersRoutes(db, request, url, { fetchMakerOptionsImpl = fetchMakerOptions } = {}) {
   if (request.method === "GET" && url.pathname === "/makers") {
-    const dbOptions = await fetchDbMakerOptions(db);
-    if (dbOptions.length > 1) return json({ rows: dbOptions });
+    const persistedOptions = await fetchPersistedMakerOptions(db);
+    if (persistedOptions.length > 1) return json({ rows: persistedOptions });
 
     const crawlerOptions = (await fetchMakerOptionsImpl()).map(normalizeMakerOption);
-    return json({ rows: uniqueSortedOptions(crawlerOptions) });
+    const normalizedCrawlerOptions = uniqueSortedOptions(crawlerOptions);
+    if (normalizedCrawlerOptions.length > 1) {
+      await upsertMakerOptions(db, normalizedCrawlerOptions);
+      return json({ rows: normalizedCrawlerOptions });
+    }
+
+    return json({ rows: await fetchListingMakerOptions(db) });
   }
   return null;
 }
