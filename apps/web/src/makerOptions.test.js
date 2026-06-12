@@ -11,7 +11,7 @@ test("normalizeMakerOptionsResponse uses API rows for dropdown choices", () => {
 
   expect(options).toEqual([
     { value: "", label: "all makers", sites: {} },
-    { value: "toyota", label: "トヨタ", sites: { carsensor: "TO" } },
+    { value: "toyota", label: "Toyota", sites: { carsensor: "TO" } },
   ]);
 });
 
