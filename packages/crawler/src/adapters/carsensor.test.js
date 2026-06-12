@@ -15,6 +15,8 @@ test("detectFromUrl recognizes carsensor", () => {
 test("buildSearchUrl contains carsensor", () => {
   const url = carsensor.buildSearchUrl({ maker: "toyota", priceMax: 2000000 });
   expect(url).toContain("carsensor.net");
+  expect(url).toContain("BRDC=TO");
+  expect(url).not.toContain("BRDC=TOYOTA");
 });
 
 test("parseListingPage extracts real canonical fields", async () => {
