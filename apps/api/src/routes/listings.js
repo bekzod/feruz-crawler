@@ -1,10 +1,18 @@
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { schema } from "@feruz-crawler/db";
+import { addConvertedPrices, exchangeRateService } from "../exchangeRates.js";
 import { json } from "../json.js";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function listingsRoutes(db, request, url) {
+function withConvertedPrices(listing, exchangeRates) {
+  return {
+    ...listing,
+    convertedPrices: addConvertedPrices(listing, exchangeRates)
+  };
+}
+
+export async function listingsRoutes(db, request, url, { exchangeRates = exchangeRateService } = {}) {
   const detail = url.pathname.match(/^\/listings\/([\w-]+)$/);
   if (request.method === "GET" && detail) {
     const id = detail[1];
@@ -13,7 +21,8 @@ export async function listingsRoutes(db, request, url) {
     if (!listing) return json({ error: "not found" }, 404);
     const prices = await db.select().from(schema.priceHistory)
       .where(eq(schema.priceHistory.listingId, id)).orderBy(schema.priceHistory.observedAt);
-    return json({ ...listing, priceHistory: prices });
+    const latestRates = await exchangeRates.getLatest();
+    return json({ ...withConvertedPrices(listing, latestRates), priceHistory: prices, exchangeRates: latestRates });
   }
   if (request.method === "GET" && url.pathname === "/listings") {
     const q = url.searchParams;
@@ -28,7 +37,8 @@ export async function listingsRoutes(db, request, url) {
     const rows = await db.select().from(schema.listings)
       .where(conds.length ? and(...conds) : undefined)
       .orderBy(desc(schema.listings.lastSeenAt)).limit(limit).offset(offset);
-    return json({ rows, limit, offset });
+    const latestRates = await exchangeRates.getLatest();
+    return json({ rows: rows.map((row) => withConvertedPrices(row, latestRates)), limit, offset, exchangeRates: latestRates });
   }
   return null;
 }
