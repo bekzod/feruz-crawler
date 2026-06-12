@@ -362,17 +362,17 @@ a:hover { text-decoration: underline; }
   gap: 12px;
 }
 
-.filters label,
+.filters label:not(.toggle-pill),
 .command-row {
   min-width: 170px;
 }
 
-.filters label {
+.filters label:not(.toggle-pill) {
   display: grid;
   gap: 5px;
 }
 
-.filters label > span,
+.filters label:not(.toggle-pill) > span,
 .toggle-group > span {
   color: var(--muted);
   font-size: 12px;
@@ -432,9 +432,19 @@ a:focus-visible {
   padding: 7px 10px;
 }
 
+.toggle-pill:has(input:checked) {
+  background: var(--blue-soft);
+  border-color: #8cbcf5;
+  color: #164c9f;
+}
+
 .toggle-pill input {
+  accent-color: var(--blue);
+  height: 14px;
+  margin: 0;
   min-height: auto;
   padding: 0;
+  width: 14px;
 }
 
 .table-wrap {
