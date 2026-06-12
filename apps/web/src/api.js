@@ -15,6 +15,7 @@ export const api = {
   runPreset: (id) => req(`/presets/${id}/run`, { method: "POST" }),
   crawlUrl: (url) => req(`/crawl/url`, { method: "POST", body: JSON.stringify({ url }) }),
   jobs: () => req(`/jobs`),
+  retryJob: (queue, id) => req(`/jobs/${queue}/${id}/retry`, { method: "POST" }),
   notifications: () => req(`/notifications`),
   readNotification: (id) => req(`/notifications/${id}/read`, { method: "POST" })
 };

@@ -18,7 +18,7 @@ export default function TableRows({ isLoading, colSpan, emptyMessage, children }
 
   return (
     <tbody>
-      {hasRows ? children : <tr><td colSpan={colSpan}>{emptyMessage}</td></tr>}
+      {hasRows ? children : <tr><td className="table-state" colSpan={colSpan}>{emptyMessage}</td></tr>}
     </tbody>
   )
 }
