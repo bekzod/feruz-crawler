@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.14 AS deps
+FROM oven/bun:1.4.3 AS deps
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN bun install --frozen-lockfile --production
 # (CloakHQ/chromium-stealth-builds) ships Linux x64 + macOS arm64 only — there is
 # no Linux arm64 build. On Apple Silicon:
 #   docker build --platform=linux/amd64 -t feruz-crawler .
-FROM oven/bun:1.3.14 AS runtime
+FROM oven/bun:1.4.3 AS runtime
 
 WORKDIR /app
 
