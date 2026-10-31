@@ -42,27 +42,48 @@ test("native Bun presigning uses path-style R2, auto region and no ACL/session t
   expect(url.searchParams.has("x-amz-acl")).toBe(false);
 });
 
-test("native R2 fails closed if Bun inherited an AWS session token at startup", () => {
-  const child = Bun.spawnSync(
-    [
-      process.execPath,
-      "--eval",
-      `
-    import { createS3Client } from ${JSON.stringify(new URL("./images.js", import.meta.url).pathname)};
-    try { createS3Client({ provider: "r2", env: ${JSON.stringify(env)} }); process.exit(1); }
-    catch (error) { if (!error.message.includes("Remove S3_SESSION_TOKEN")) throw error; }
-  `,
-    ],
+const startupTokens = [
+  ["S3 only", { S3_SESSION_TOKEN: "test-s3-session" }],
+  ["AWS only", { AWS_SESSION_TOKEN: "test-aws-session" }],
+  [
+    "both",
     {
-      env: {
-        ...process.env,
-        AWS_SESSION_TOKEN: "test-aws-session",
-        S3_SESSION_TOKEN: "test-s3-session",
-      },
+      S3_SESSION_TOKEN: "test-s3-session",
+      AWS_SESSION_TOKEN: "test-aws-session",
     },
-  );
-  expect(child.exitCode).toBe(0);
-});
+  ],
+];
+
+for (const [label, tokens] of startupTokens) {
+  for (const clearAfterStartup of [false, true]) {
+    test(`native R2 blocks ${label} startup tokens before I/O (clear process.env: ${clearAfterStartup})`, () => {
+      const childEnv = { ...process.env };
+      delete childEnv.S3_SESSION_TOKEN;
+      delete childEnv.AWS_SESSION_TOKEN;
+      const child = Bun.spawnSync(
+        [
+          process.execPath,
+          "--eval",
+          `
+        import { uploadListingPhoto } from ${JSON.stringify(new URL("./images.js", import.meta.url).pathname)};
+        if (${clearAfterStartup}) { delete process.env.S3_SESSION_TOKEN; delete process.env.AWS_SESSION_TOKEN; }
+        Bun.S3Client.prototype.write = async () => { throw new Error('unexpected storage write'); };
+        globalThis.fetch = async () => { throw new Error('unexpected image fetch'); };
+        try {
+          await uploadListingPhoto('https://source.example/photo.jpg', {}, 0, {
+            env: ${JSON.stringify({ ...env, R2_PUBLIC_BASE_URL: "https://media.example.test" })},
+          });
+          throw new Error('R2 upload unexpectedly accepted ambient session token');
+        } catch (error) { if (!error.message.includes('Remove S3_SESSION_TOKEN')) throw error; }
+      `,
+        ],
+        { env: { ...childEnv, ...tokens } },
+      );
+      expect(child.stderr.toString()).toBe("");
+      expect(child.exitCode).toBe(0);
+    });
+  }
+}
 
 test("global R2 endpoints are rejected for EU-only buckets", () => {
   expect(() =>
