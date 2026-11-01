@@ -1,0 +1,3 @@
+{
+  "ignoreCommand": "sh scripts/ignore-vercel-build.sh"
+}
