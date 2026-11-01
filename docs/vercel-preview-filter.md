@@ -1,6 +1,6 @@
 # Vercel preview build filter
 
-Both preview and production builds skip only reliably unrelated changes. Unknown/development environments, first production deployments, rollbacks and rewritten history always build.
+Only preview builds skip reliably unrelated changes. Production always builds: VERCEL_GIT_PREVIOUS_SHA is project/branch-scoped, not target-specific, so even master may reference a preview rather than the last production deployment. Production filtering needs a separately verified production baseline and is not implemented. Unknown/development/custom environments, same-SHA redeployments, rollbacks and rewritten history always build.
 
 All shared packages and workspace manifests/locks remain build-affecting.
 

@@ -20,10 +20,14 @@ function decision() {
     return [1, "Development and unknown environments always build"];
   }
 
-  // A promoted feature branch may have only a preview deployment baseline.
-  // Never use that baseline to suppress its first production deployment.
-  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_GIT_COMMIT_REF !== "master") {
-    return [1, "Production promotion or unknown production branch; building"];
+  // VERCEL_GIT_PREVIOUS_SHA is project/branch-scoped, not target-scoped.
+  // Even master may have a successful preview newer than production. Without
+  // an independently verified production baseline, never suppress production.
+  if (process.env.VERCEL_ENV === "production") {
+    return [1, "No verified target-specific production baseline; building"];
+  }
+  if (process.env.VERCEL_TARGET_ENV && process.env.VERCEL_TARGET_ENV !== "preview") {
+    return [1, "Custom or conflicting deployment target; building"];
   }
 
   let stage = "repository discovery";
@@ -42,9 +46,6 @@ function decision() {
       stage = "deployment ancestry";
       git("merge-base", "--is-ancestor", base, "HEAD");
     } else {
-      if (process.env.VERCEL_ENV === "production") {
-        return [1, "No previous successful production baseline; building"];
-      }
       // First preview: compare the entire branch, not just the latest commit.
       // Vercel's shallow checkout may not include master. Fetch only that branch;
       // unavailable history/network/merge base always permits the build.
@@ -59,6 +60,11 @@ function decision() {
         base = git("merge-base", "HEAD", "refs/remotes/origin/master").trim();
       }
       if (!base) throw new Error("No merge base");
+    }
+    // A same-SHA request may rebuild changed environment variables/settings.
+    // An empty baseline diff must not cancel that explicit redeployment.
+    if (base.toLowerCase() === git("rev-parse", "HEAD").trim().toLowerCase()) {
+      return [1, "Same-SHA redeployment or empty first-preview baseline; building"];
     }
     // NUL delimiters support unusual filenames; no-renames accounts for both
     // sides of moves (especially frontend -> backend).

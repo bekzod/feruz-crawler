@@ -116,9 +116,9 @@ test("workspace manifests in otherwise independent apps still build", t => {
 });
 
 
-test("production skips only a reliable unrelated cumulative diff", t => {
+test("production does not trust a project-branch preview baseline", t => {
   const f = fixture(t); f.commit("apps/api/server.js");
-  assert.equal(f.run({ VERCEL_ENV: "production" }).status, 0);
+  assert.equal(f.run({ VERCEL_ENV: "production" }).status, 1);
   assert.equal(f.run({ VERCEL_ENV: "production", VERCEL_GIT_PREVIOUS_SHA: "" }).status, 1);
   f.commit("shared/new-input.js");
   assert.equal(f.run({ VERCEL_ENV: "production" }).status, 1);
@@ -151,4 +151,40 @@ test("portable shell wrapper preserves skip exit zero", t => {
  const f = fixture(t); f.commit("README.md");
  const result = spawnSync("/bin/sh", [wrapper], { cwd: f.cwd, encoding: "utf8", env: { ...process.env, VERCEL_ENV: "preview", VERCEL_GIT_PREVIOUS_SHA: f.base } });
  assert.equal(result.status, 0, result.stderr || result.stdout);
+});
+
+test("same-SHA redeploy always builds, including uppercase SHA", t => {
+  const f = fixture(t);
+  for (const VERCEL_GIT_PREVIOUS_SHA of [f.base, f.base.toUpperCase()]) {
+    assert.equal(f.run({ VERCEL_GIT_PREVIOUS_SHA }).status, 1);
+  }
+});
+test("production builds even when master preview already contains new UI", t => {
+  const f = fixture(t);
+  const preview = f.commit("apps/web/src/app.ts", "preview-only UI");
+  f.commit("README.md", "unrelated later change");
+  for (const VERCEL_GIT_COMMIT_REF of ["master", "main", "feature", ""]) {
+    const r = f.run({ VERCEL_ENV: "production", VERCEL_GIT_COMMIT_REF, VERCEL_GIT_PREVIOUS_SHA: preview });
+    assert.equal(r.status, 1);
+    assert.match(r.stdout, /target-specific production baseline/);
+  }
+});
+test("custom and conflicting targets build conservatively", t => {
+  const f = fixture(t); f.commit("README.md");
+  for (const VERCEL_TARGET_ENV of ["production", "staging"]) {
+    assert.equal(f.run({ VERCEL_TARGET_ENV }).status, 1);
+  }
+});
+test("first-preview baseline equal to HEAD builds", t => {
+  const f = fixture(t);
+  f.git("update-ref", "refs/remotes/origin/master", f.base);
+  assert.equal(f.run({ VERCEL_GIT_PREVIOUS_SHA: "" }).status, 1);
+});
+test("shell wrapper allows same-SHA manual redeploy", t => {
+  const f = fixture(t);
+  const result = spawnSync("/bin/sh", [wrapper], {
+    cwd: f.cwd, encoding: "utf8",
+    env: { ...process.env, VERCEL_ENV: "preview", VERCEL_GIT_PREVIOUS_SHA: f.base }
+  });
+  assert.equal(result.status, 1);
 });
