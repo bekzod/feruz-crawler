@@ -22,7 +22,7 @@ Two trigger modes:
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) >= 1.1
+- [Bun](https://bun.sh) 1.4.3 (matches `.bun-version`, `packageManager`, and both Docker stages)
 - [Docker](https://docs.docker.com/get-docker/) (for Postgres and Redis)
 
 ## Quick start
