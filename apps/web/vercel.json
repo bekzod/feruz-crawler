@@ -1,0 +1,4 @@
+{
+  "ignoreCommand": "node scripts/ignore-vercel-preview.mjs"
+}
+

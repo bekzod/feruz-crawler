@@ -1,0 +1,27 @@
+name: Vercel preview filter
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-preview-filter-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Vercel preview filter tests
+    runs-on: boat
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Test preview decisions using real Git histories
+        run: node --test apps/web/scripts/ignore-vercel-preview.test.mjs
+
