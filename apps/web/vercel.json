@@ -1,4 +1,3 @@
 {
-  "ignoreCommand": "node scripts/ignore-vercel-preview.mjs"
+  "ignoreCommand": "sh scripts/ignore-vercel-build.sh"
 }
-

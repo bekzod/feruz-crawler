@@ -16,7 +16,7 @@ concurrency:
 jobs:
   test:
     name: Vercel preview filter tests
-    runs-on: boat
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

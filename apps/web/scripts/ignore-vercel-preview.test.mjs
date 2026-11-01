@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
 const script = fileURLToPath(new URL("./ignore-vercel-preview.mjs", import.meta.url));
+const wrapper = fileURLToPath(new URL("./ignore-vercel-build.sh", import.meta.url));
 function fixture(t) {
   const cwd = mkdtempSync(join(tmpdir(), "vercel-preview-"));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
@@ -135,4 +136,19 @@ test("production promotions and missing branch metadata always build", t => {
  for (const VERCEL_GIT_COMMIT_REF of ["feature", ""]) {
   assert.equal(f.run({ VERCEL_ENV: "production", VERCEL_GIT_COMMIT_REF }).status, 1);
  }
+});
+
+test("portable shell wrapper builds safely when runtimes are unavailable", () => {
+ const result = spawnSync("/bin/sh", [wrapper], { encoding: "utf8", env: { PATH: "/missing" } });
+ assert.equal(result.status, 1);
+});
+test("portable shell wrapper preserves non-preview fallback", () => {
+ const result = spawnSync("/bin/sh", [wrapper], { encoding: "utf8", env: { ...process.env, VERCEL_ENV: "development" } });
+ assert.equal(result.status, 1);
+});
+
+test("portable shell wrapper preserves skip exit zero", t => {
+ const f = fixture(t); f.commit("README.md");
+ const result = spawnSync("/bin/sh", [wrapper], { cwd: f.cwd, encoding: "utf8", env: { ...process.env, VERCEL_ENV: "preview", VERCEL_GIT_PREVIOUS_SHA: f.base } });
+ assert.equal(result.status, 0, result.stderr || result.stdout);
 });
